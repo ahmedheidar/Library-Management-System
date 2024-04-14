@@ -28,7 +28,6 @@ public class BorrowingRecordController {
         borrowingRecordService.returnBook(bookId, patronId);
         return ResponseEntity.ok("Book returned successfully");
     }
-
     @GetMapping("/borrowing-records")
     public ResponseEntity<List<BorrowingRecord>> getBorrowingRecords() {
         return ResponseEntity.ok(borrowingRecordService.getBorrowingRecords());

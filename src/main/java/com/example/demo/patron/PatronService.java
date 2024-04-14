@@ -31,9 +31,13 @@ public class PatronService {
         return patronRepository.save(patron);
     }
     @Transactional
-    public void updatePatron(Long patronId, Patron patron) {
+    public UpdateResult updatePatron(Long patronId, Patron patron) {
         Patron patronToUpdate = patronRepository.findById(patronId)
-                .orElseThrow(() -> new IllegalStateException("Patron with id " + patronId + " does not exist"));
+                .orElse(null);
+
+        if (patronToUpdate == null) {
+            return UpdateResult.PATRON_NOT_FOUND;
+        }
 
         if (patron.getName() != null) {
             patronToUpdate.setName(patron.getName());
@@ -60,17 +64,20 @@ public class PatronService {
         }
 
         patronToUpdate.setUpdatedAt(LocalDate.now());
+
+        return UpdateResult.SUCCESS;
     }
 
-    public void deletePatron(Long patronId) {
-        boolean exists = patronRepository.existsById(patronId);
-        if (!exists) {
-            throw new IllegalStateException("Patron with id " + patronId + " does not exist");
+    public UpdateResult deletePatron(Long patronId) {
+        Patron patronToDelete = patronRepository.findById(patronId)
+                .orElse(null);
+
+        if (patronToDelete == null) {
+            return UpdateResult.PATRON_NOT_FOUND;
         }
-        patronRepository.findById(patronId)
-                .ifPresent(patron -> {
-                    patron.setDeletedAt(LocalDate.now());
-                    patronRepository.save(patron);
-                });
+
+        patronToDelete.setDeletedAt(LocalDate.now());
+
+        return UpdateResult.SUCCESS;
     }
 }

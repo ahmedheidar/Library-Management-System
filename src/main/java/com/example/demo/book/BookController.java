@@ -1,6 +1,8 @@
 package com.example.demo.book;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,27 +18,45 @@ public class BookController {
     }
 
     @GetMapping
-    public List<Book> getBooks() {
-        return bookService.getBooksNotDeleted();
+    public ResponseEntity<List<Book>> getBooks() {
+        List<Book> books = bookService.getBooksNotDeleted();
+        return ResponseEntity.ok(books);
     }
 
     @GetMapping(path = "{bookId}")
-    public Book getBook(@PathVariable("bookId") Long bookId) {
-        return bookService.getBook(bookId);
+    public ResponseEntity<Book> getBook(@PathVariable("bookId") Long bookId) {
+        Book book = bookService.getBook(bookId);
+        if (book != null) {
+            return ResponseEntity.ok(book);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public Book addBook(@RequestBody Book book) {
-        return bookService.addBook(book);
+    public ResponseEntity<Book> addBook(@RequestBody Book book) {
+        Book addedBook = bookService.addBook(book);
+        return ResponseEntity.status(HttpStatus.CREATED).body(addedBook);
     }
 
-    @DeleteMapping(path = "{bookId}")
-    public void deleteBook(@PathVariable("bookId") Long bookId) {
-        bookService.deleteBook(bookId);
+    public ResponseEntity<Void> deleteBook(@PathVariable("bookId") Long bookId) {
+        UpdateResult result = bookService.deleteBook(bookId);
+
+        return switch (result) {
+            case SUCCESS -> ResponseEntity.ok().build();
+            case BOOK_NOT_FOUND -> ResponseEntity.notFound().build();
+            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        };
     }
 
     @PutMapping(path = "{bookId}")
-    public void updateBook(@PathVariable("bookId") Long bookId, @RequestBody Book book) {
-        bookService.updateBook(bookId, book);
+    public ResponseEntity<String> updateBook(@PathVariable("bookId") Long bookId, @RequestBody Book book) {
+        UpdateResult result = bookService.updateBook(bookId, book);
+
+        return switch (result) {
+            case SUCCESS -> ResponseEntity.ok("Book updated successfully");
+            case BOOK_NOT_FOUND -> ResponseEntity.notFound().build();
+            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred");
+        };
     }
 }

@@ -30,16 +30,17 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public void deleteBook(Long bookId) {
-        boolean exists = bookRepository.existsById(bookId);
-        if (!exists) {
-            throw new IllegalStateException("Book with id " + bookId + " does not exist");
+    public UpdateResult deleteBook(Long bookId) {
+        Book bookToDelete = bookRepository.findById(bookId)
+                .orElse(null);
+
+        if (bookToDelete == null) {
+            return UpdateResult.BOOK_NOT_FOUND;
         }
-        bookRepository.findById(bookId)
-                .ifPresent(book -> {
-                    book.setDeletedAt(LocalDate.now());
-                    bookRepository.save(book);
-                });
+
+        bookToDelete.setDeletedAt(LocalDate.now());
+
+        return UpdateResult.SUCCESS;
     }
 
     public Book getBook(Long bookId) {
@@ -48,9 +49,13 @@ public class BookService {
     }
 
     @Transactional
-    public void updateBook(Long bookId, Book book) {
+    public UpdateResult updateBook(Long bookId, Book book) {
         Book bookToUpdate = bookRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalStateException("Book with id " + bookId + " does not exist"));
+                .orElse(null);
+
+        if (bookToUpdate == null) {
+            return UpdateResult.BOOK_NOT_FOUND;
+        }
 
         if (book.getTitle() != null) {
             bookToUpdate.setTitle(book.getTitle());
@@ -77,5 +82,8 @@ public class BookService {
         }
 
         bookToUpdate.setUpdatedAt(LocalDate.now());
+
+        return UpdateResult.SUCCESS;
     }
 }
+
