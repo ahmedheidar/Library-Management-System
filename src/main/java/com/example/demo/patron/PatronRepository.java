@@ -9,4 +9,7 @@ public interface PatronRepository extends JpaRepository<Patron, Long> {
 
     @Query("SELECT p FROM Patron p WHERE p.deletedAt IS NULL")
     List<Patron> findAllNotDeleted();
+
+    @Query("SELECT p FROM Patron p WHERE p.deletedAt IS NULL AND p.id = :id")
+    Patron findNotDeletedById(Long id);
 }

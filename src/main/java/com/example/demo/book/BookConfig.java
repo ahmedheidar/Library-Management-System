@@ -11,7 +11,7 @@ import java.util.List;
 public class BookConfig {
 
     @Bean
-    CommandLineRunner commandLineRunner(BookRepository repository) {
+    CommandLineRunner bookCommandLineRunner(BookRepository repository) {
         return args -> {
             Book book1 = Book.builder().title("The Great Gatsby")
                     .author("F. Scott Fitzgerald")

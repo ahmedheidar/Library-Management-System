@@ -11,7 +11,7 @@ import java.util.List;
 public class PatronConfig {
 
     @Bean
-    CommandLineRunner commandLineRunner(PatronRepository repository) {
+    CommandLineRunner patronCommandLineRunner(PatronRepository repository) {
         return args -> {
             Patron patron1 = Patron.builder().name("John Doe")
                     .email("JohnDoe@example.com")
